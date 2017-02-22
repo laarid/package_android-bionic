@@ -28,7 +28,9 @@ GITIGNOREFILES = \
 # -------------------
 AM_CPPFLAGS = \
 	-include config.h \
-	-I$(top_srcdir)/include
+	-Iinclude \
+	-I$(top_srcdir)/include \
+	-DRUNSTATEDIR=\"$(runstatedir)\"
 
 AM_CFLAGS = \
 	-Wall -Werror \
@@ -61,6 +63,18 @@ libandroid_bionic_la_SOURCES = \
 	src/strlcat.c \
 	src/uio.c \
 	src/unistd.c
+
+# include/bionic/properties_impl.h
+# --------------------------------
+include/bionic/properties_impl.h: $(top_srcdir)/include/bionic/properties_impl.h.in Makefile.am
+	$(AM_V_GEN)$(MKDIR_P) $(@D); \
+	cat $< | $(SED) -e 's|!localstatedir!|$(localstatedir)|' \
+	                -e 's|!runstatedir!|$(runstatedir)|' \
+	                -e 's|!sysconfdir!|$(sysconfdir)|' \
+	  > $@
+
+BUILT_SOURCES += \
+	include/bionic/properties_impl.h
 
 # bionic HEADERS
 # --------------
