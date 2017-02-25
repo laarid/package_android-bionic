@@ -57,7 +57,7 @@
 
 using namespace std;
 
-static const char property_service_socket[] = RUNSTATEDIR "/" PROP_SERVICE_NAME ".sock";
+static const char property_service_socket[] = RUNSTATEDIR "/" PROP_SERVICE_NAME;
 
 
 /*
