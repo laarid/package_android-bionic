@@ -1,3 +1,10 @@
+android-bionic (0.1.6) testing; urgency=low
+
+  * property: remove .sock suffix for property service socket file
+  * property: remove some definitions
+
+ -- You-Sheng Yang <vicamo@gmail.com>  Sat, 25 Feb 2017 20:08:23 +0800
+
 android-bionic (0.1.5) testing; urgency=low
 
   * add getprogname
