@@ -79,12 +79,6 @@ struct prop_msg
 **   3. pi->serial = (value_len << 24) | ((pi->serial + 1) & 0xffffff)
 */
 
-#define PROP_PATH_RAMDISK_DEFAULT  "!runstatedir!/default.prop"
-#define PROP_PATH_SYSTEM_BUILD     "!sysconfdir!/property.d/system.prop"
-#define PROP_PATH_VENDOR_BUILD     "!sysconfdir!/property.d/vendor.prop"
-#define PROP_PATH_LOCAL_OVERRIDE   "!localstatedir!/property.d/local.prop"
-#define PROP_PATH_FACTORY          "!sysconfdir!/property.d/factory.prop"
-
 /*
 ** Map the property area from the specified filename.  This
 ** method is for testing only.
