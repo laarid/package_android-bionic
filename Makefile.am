@@ -20,8 +20,8 @@ MAINTAINERCLEANFILES = \
 # not the docker image architecture as we expected, so specifying the
 # host/build information is necessary here.
 DISTCHECK_CONFIGURE_FLAGS = \
-	--host=$(host) \
-	--build=$(build) \
+	--host=$(host_alias) \
+	--build=$(build_alias) \
 	--disable-maintainer-mode
 
 GITIGNOREFILES = \
