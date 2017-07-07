@@ -52,6 +52,7 @@ before_install:
     /bin/bash
 
 install:
+- ${DOCKER_EXEC_ROOT} chown -R laarid:laarid ${TRAVIS_BUILD_DIR%${TRAVIS_REPO_SLUG}}
 - ${DOCKER_EXEC_ROOT} apt-get update --quiet --quiet
 - |
   ${DOCKER_EXEC} mk-build-deps \
@@ -66,6 +67,7 @@ script:
 - git status | grep 'working tree clean'
 
 before_deploy:
+- sudo chown -R $(id -u):$(id -g) ${TRAVIS_BUILD_DIR%${TRAVIS_REPO_SLUG}}
 - |
   cat debian/bintray.json.in | \
     sed -e "s#@BINTRAY_PACKAGE@#$(cat debian/control | grep ^Source: | awk '{print $2}')#g" \
