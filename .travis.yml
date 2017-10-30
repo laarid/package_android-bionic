@@ -16,15 +16,21 @@ env:
   - JOB_ARCH=ppc64el
   - JOB_ARCH=s390x
   global:
-  - DOCKER_EXEC_ROOT="sudo docker exec -it -u root test_container"
-  - DOCKER_EXEC="sudo docker exec -it test_container"
-  - DOCKER_EXEC_NOTTY="sudo docker exec test_container"
+  - DOCKER_EXEC_ROOT="sudo docker exec --user root test_container"
+  - DOCKER_EXEC="sudo docker exec test_container"
   - BINTRAY_USER=laarid
   - BINTRAY_REPO=main
   - BINTRAY_DESC="Android Bionic library"
   - BINTRAY_COMPONENT=main
 
+addons:
+  apt:
+    packages:
+    - dpkg-dev
+
 before_install:
+- |
+  export JOB_SUITE=$(dpkg-parsechangelog | grep ^Distribution: | awk '{print $2}')
 - docker run --rm --privileged vicamo/binfmt-qemu:latest
 - cat /proc/sys/fs/binfmt_misc/qemu-*
 - |
@@ -33,7 +39,7 @@ before_install:
     --volume ${TRAVIS_BUILD_DIR%${TRAVIS_REPO_SLUG}}:${TRAVIS_BUILD_DIR%${TRAVIS_REPO_SLUG}} \
     --workdir ${TRAVIS_BUILD_DIR} \
     --add-host dl.bintray.com:$(nslookup dl.bintray.com | grep -m1 -A1 Name: | grep Address: | awk '{print $2}') \
-    laarid/devel:${TRAVIS_BRANCH}-${JOB_ARCH} \
+    laarid/devel:${JOB_SUITE}-${JOB_ARCH} \
     /bin/bash
 
 install:
@@ -64,7 +70,7 @@ before_deploy:
         -e "s#@BINTRAY_RELEASE_DATE@#$(date -Iseconds --date="$(${DOCKER_EXEC} dpkg-parsechangelog | grep ^Date: | cut -d ' ' -f 2-)")#g" \
         -e "s#@BINTRAY_OUTDIR@#$(dirname ${TRAVIS_BUILD_DIR})#g" \
         -e "s#@BINTRAY_POOLABBR@#$(${DOCKER_EXEC} dpkg-parsechangelog | grep ^Source: | awk '{print $2}' | cut -c1)#g" \
-        -e "s#@BINTRAY_SUITE@#${TRAVIS_BRANCH}#g" \
+        -e "s#@BINTRAY_SUITE@#${JOB_SUITE}#g" \
         -e "s#@BINTRAY_COMPONENT@#${BINTRAY_COMPONENT}#g" \
         -e "s#@BINTRAY_ARCH@#${JOB_ARCH}#g" | \
     tee debian/bintray.json
