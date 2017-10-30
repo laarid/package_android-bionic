@@ -55,15 +55,15 @@ before_deploy:
 - sudo chown -R $(id -u):$(id -g) ${TRAVIS_BUILD_DIR%${TRAVIS_REPO_SLUG}}
 - |
   cat debian/bintray.json.in | \
-    sed -e "s#@BINTRAY_PACKAGE@#$(cat debian/control | grep ^Source: | awk '{print $2}')#g" \
+    sed -e "s#@BINTRAY_PACKAGE@#$(${DOCKER_EXEC} dpkg-parsechangelog | grep ^Source: | awk '{print $2}')#g" \
         -e "s#@BINTRAY_USER@#${BINTRAY_USER}#g" \
         -e "s#@BINTRAY_REPO@#${BINTRAY_REPO}#g" \
         -e "s#@BINTRAY_DESC@#${BINTRAY_DESC}#g" \
         -e "s#@GITHUB_REPO@#${TRAVIS_REPO_SLUG}#g" \
-        -e "s,@BINTRAY_VERSION@,$(cat debian/changelog | head -n 1 | sed 's,.*(\(.*\)).*,\1,'),g" \
-        -e "s#@BINTRAY_RELEASE_DATE@#$(cat debian/changelog | grep -m 1 '^ -- ' | sed 's,^.*  ,,')#g" \
+        -e "s#@BINTRAY_VERSION@#$(${DOCKER_EXEC} dpkg-parsechangelog | grep ^Version: | awk '{print $2}')#g" \
+        -e "s#@BINTRAY_RELEASE_DATE@#$(date -Iseconds --date="$(${DOCKER_EXEC} dpkg-parsechangelog | grep ^Date: | cut -d ' ' -f 2-)")#g" \
         -e "s#@BINTRAY_OUTDIR@#$(dirname ${TRAVIS_BUILD_DIR})#g" \
-        -e "s#@BINTRAY_POOLABBR@#$(cat debian/control | grep ^Source: | awk '{print $2}' | cut -c1)#g" \
+        -e "s#@BINTRAY_POOLABBR@#$(${DOCKER_EXEC} dpkg-parsechangelog | grep ^Source: | awk '{print $2}' | cut -c1)#g" \
         -e "s#@BINTRAY_SUITE@#${TRAVIS_BRANCH}#g" \
         -e "s#@BINTRAY_COMPONENT@#${BINTRAY_COMPONENT}#g" \
         -e "s#@BINTRAY_ARCH@#${JOB_ARCH}#g" | \
