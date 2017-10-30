@@ -24,11 +24,6 @@ env:
   - BINTRAY_DESC="Android Bionic library"
   - BINTRAY_COMPONENT=main
 
-branches:
-  only:
-  - master
-  - release
-
 before_install:
 - docker run --rm --privileged vicamo/binfmt-qemu:latest
 - cat /proc/sys/fs/binfmt_misc/qemu-*
@@ -38,7 +33,7 @@ before_install:
     --volume ${TRAVIS_BUILD_DIR%${TRAVIS_REPO_SLUG}}:${TRAVIS_BUILD_DIR%${TRAVIS_REPO_SLUG}} \
     --workdir ${TRAVIS_BUILD_DIR} \
     --add-host dl.bintray.com:$(nslookup dl.bintray.com | grep -m1 -A1 Name: | grep Address: | awk '{print $2}') \
-    laarid/devel:${JOB_ARCH} \
+    laarid/devel:${TRAVIS_BRANCH}-${JOB_ARCH} \
     /bin/bash
 
 install:
@@ -69,7 +64,7 @@ before_deploy:
         -e "s#@BINTRAY_RELEASE_DATE@#$(cat debian/changelog | grep -m 1 '^ -- ' | sed 's,^.*  ,,')#g" \
         -e "s#@BINTRAY_OUTDIR@#$(dirname ${TRAVIS_BUILD_DIR})#g" \
         -e "s#@BINTRAY_POOLABBR@#$(cat debian/control | grep ^Source: | awk '{print $2}' | cut -c1)#g" \
-        -e "s#@BINTRAY_SUITE@#$(${DOCKER_EXEC_NOTTY} cat /etc/apt/sources.list | grep -m 1 '^deb ' | awk '{print $3}')#g" \
+        -e "s#@BINTRAY_SUITE@#${TRAVIS_BRANCH}#g" \
         -e "s#@BINTRAY_COMPONENT@#${BINTRAY_COMPONENT}#g" \
         -e "s#@BINTRAY_ARCH@#${JOB_ARCH}#g" | \
     tee debian/bintray.json
@@ -81,7 +76,7 @@ deploy:
   key:
     secure: "XVnXzz3GD87gjGb90AeyiN6s8qyWdhhhiq0CEfn4k73o0kA+VSoAcozsXq1wmYHyu0OTLyjFWgzWdAGJKNRldRpS54lIZ0BzyycvZhTDw8+ANMHE2L4z2Bski4nbXtrYX0mkBl+OHLIVQid1YnvNnHq4RoIl0iJu7tR0RNP6rR+DPLAlEtVuL1TCNodJhApwAfGZ/ZMuBdE7WH1xTH5TVTHDvsdbOpyhmwVicQSa1NqRNdMeontLkqQ1Yr9IxTnyqn7uwit4DvK5gQ8CUrTCzQ9lBZMeP7ucCPNvxBVbGmbCIko19U2PoECDdmIQ4bB9yRofPgv29XJyzEN4S+QG8tyhhidmZJI5Syxi3LG3bPrnsFdXlpYdGPh+nzT2F3aD5zzDfXpUlx073fTeOCjoTmQzRZU6y7B5qnp+xt1Uf0J6FRNePLAv/3Q80xeQJvpvJssDJgfOALdyvjZFRHNxP+h/WqqnblnDb+x2etgjIUH9zro64j+3rTQs7l/2FxbYsj5/QexNSRxPC/eh40CZgQLJ+MVYFz+nZ7C3dzHQhbK2yvIp/GQieCh1BuQpvtRjFHOMPxIUaOXQ9ezjUOjP7LmWQTebo4tLZ4geRC2Ywm4tVMbVBy3WjWUi2wHSCNbFQKQPxD6570ejojo0CNglv0Jh9fqR8jj4gVqDjrYkNog="
   on:
-    branch: release
+    tags: true
 
 notifications:
   slack:
